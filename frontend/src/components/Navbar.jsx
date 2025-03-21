@@ -1,127 +1,139 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { assets } from "../assets/assets";
 import { Link, NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Navbar = () => {
-  const [toggleMenu, setToggleMenu] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const {setShowSearch,getCartCount}=useContext(ShopContext)
- // Replace with actual cart state from Redux/Context
+  const { setShowSearch, getCartCount, navigate, token, setToken, setCartItem } = useContext(ShopContext);
+
+  const profileRef = useRef(null);
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+    setToken("");
+    setCartItem({});
+    setShowProfile(false);
+  };
+
+  // Close profile dropdown if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setShowProfile(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="flex items-center justify-between py-5 font-medium relative">
-      <Link to={'/home'}>
-        <img src={assets.logo} alt="Logo" className="w-50" />
+    <nav className="flex items-center justify-between py-4 relative px-4 sm:px-8">
+      <Link to="/">
+        <img src={assets.logo} alt="Logo" className="w-40" />
       </Link>
 
-      {/* Desktop Navigation */}
-      <ul className="hidden sm:flex gap-5 text-sm text-gray-700">
-        {["Home", "Collection", "About", "Contact"].map((item, index) => (
-          <NavLink
-            key={index}
-            to={`/${item.toLowerCase()}`}
-            className={({ isActive }) =>
-              `flex flex-col items-center gap-1 ${
-                isActive ? "text-black font-semibold border-b-1" : "text-gray-700"
-              }`
-            }
-          >
-            <p>{item}</p>
-            <hr className="w-2/4 border-none h-[1.5px] bg-gray-700 hidden" />
-          </NavLink>
-        ))}
+      <ul className="hidden sm:flex gap-6 text-gray-700">
+        <NavLink to="/" className={({ isActive }) => (isActive ? "text-black font-bold" : "text-gray-700")}>
+          Home
+        </NavLink>
+        <NavLink to="/collection" className={({ isActive }) => (isActive ? "text-black font-bold" : "text-gray-700")}>
+          Collection
+        </NavLink>
+        <NavLink to="/about" className={({ isActive }) => (isActive ? "text-black font-bold" : "text-gray-700")}>
+          About
+        </NavLink>
+        <NavLink to="/contact" className={({ isActive }) => (isActive ? "text-black font-bold" : "text-gray-700")}>
+          Contact
+        </NavLink>
       </ul>
 
-      {/* Right-side Icons */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-6 relative">
         <img
-        onClick={()=>setShowSearch(true)}
           src={assets.search_icon}
-          className="w-5 cursor-pointer"
           alt="Search"
+          className="w-5 cursor-pointer"
+          onClick={() => setShowSearch(true)}
         />
 
-        {/* Profile Dropdown */}
-        <div
-          className="relative"
-          onMouseEnter={() => setShowProfile(true)}
-          onMouseLeave={() => setShowProfile(false)}
-        >
-          <Link to={'/login'}>
-          <img
-            src={assets.profile_icon}
-            className="w-5 cursor-pointer"
-            alt="Profile"
-          />
-          </Link>
-          {showProfile && (
-            <div className="absolute right-0 mt-2 w-36 bg-slate-100 text-gray-500 rounded shadow-lg">
-              <div className="flex flex-col gap-2 py-3 px-5">
-                <p className="cursor-pointer hover:text-black">My Profile</p>
-                <p className="cursor-pointer hover:text-black">Orders</p>
-                <p className="cursor-pointer hover:text-black">Logout</p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Cart Icon with Dynamic Count */}
         <Link to="/cart" className="relative">
-          <img src={assets.cart_icon} alt="Cart" className="w-5 min-w-5" />
-         
-            <p className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]">
-              {getCartCount()}
-            </p>
-        
+          <img src={assets.cart_icon} alt="Cart" className="w-5" />
+          <span className="absolute -right-1 -bottom-1 bg-black text-white text-xs rounded-full px-1">
+            {getCartCount()}
+          </span>
         </Link>
 
-        {/* Mobile Menu Toggle */}
+        <div ref={profileRef} className="relative cursor-pointer">
+          <img
+            onClick={() => (token ? setShowProfile((prev) => !prev) : navigate("/login"))}
+            src={assets.profile_icon}
+            alt="Profile"
+            className="w-5"
+          />
+
+          <AnimatePresence>
+            {token && showProfile && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute right-0 top-6 bg-white shadow-md rounded p-3 w-36 flex flex-col gap-2 text-gray-600 z-50"
+              >
+                <p className="hover:text-black cursor-pointer">My Profile</p>
+                <p onClick={()=>navigate('/orders')} className="hover:text-black cursor-pointer">Orders</p>
+                <p className="hover:text-black cursor-pointer" onClick={logout}>
+                  Logout
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         <img
-          onClick={() => setToggleMenu(true)}
           src={assets.menu_icon}
-          className="w-5 cursor-pointer sm:hidden"
           alt="Menu"
+          className="w-5 cursor-pointer sm:hidden"
+          onClick={() => setMenuOpen(true)}
         />
       </div>
 
-      {/* Sidebar Menu for Small Screens */}
-      <div
-        className={`fixed top-0 right-0 bottom-0 bg-white transition-transform transform ${
-          toggleMenu ? "translate-x-0 w-full" : "translate-x-full w-0"
-        }`}
-      >
-        <div className="flex flex-col text-gray-600">
-          {/* Close Button */}
-          <div
-            className="flex items-center gap-4 p-3 cursor-pointer"
-            onClick={() => setToggleMenu(false)}
-          >
-            <img
-              className="h-4 rotate-180"
-              src={assets.dropdown_icon}
-              alt="Back"
-            />
-            <p>Back</p>
-          </div>
+      {menuOpen && <div className="fixed inset-0 bg-black opacity-40 z-40" onClick={() => setMenuOpen(false)} />}
 
-          {/* Mobile Nav Links */}
-          {["Home", "Collection", "About", "Contact"].map((item, index) => (
-            <NavLink
-              key={index}
-              onClick={() => setToggleMenu(false)}
-              className={({ isActive }) =>
-                `flex flex-col py-4 pl-4 gap-1 ${
-                  isActive ? "text-black font-semibold border-b-1" : "text-gray-700"
-                }`
-              }
-              to={`/${item.toLowerCase()}`}
-            >
-              {item}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "tween", duration: 0.3 }}
+            className="fixed right-0 top-0 h-full w-64 bg-white p-6 flex flex-col gap-4 text-gray-700 z-50 shadow-lg"
+          >
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => setMenuOpen(false)}>
+              <img src={assets.dropdown_icon} alt="Close" className="w-4 rotate-180" />
+              <p>Close</p>
+            </div>
+
+            <NavLink to="/" onClick={() => setMenuOpen(false)}>
+              Home
             </NavLink>
-          ))}
-        </div>
-      </div>
-    </div>
+            <NavLink to="/collection" onClick={() => setMenuOpen(false)}>
+              Collection
+            </NavLink>
+            <NavLink to="/about" onClick={() => setMenuOpen(false)}>
+              About
+            </NavLink>
+            <NavLink to="/contact" onClick={() => setMenuOpen(false)}>
+              Contact
+            </NavLink>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
   );
 };
 
