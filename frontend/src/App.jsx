@@ -13,9 +13,12 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import { ToastContainer, toast } from 'react-toastify';
+import Verify from "./pages/Verify";
+import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick-theme.css";
 const App = () => {
   return (
-    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:[9vw]">
+    <div className="px-4 sm:px-[5vw] md:px-[7vw] lg:[9vw] bg-amber-100">
       <ToastContainer />
       <Navbar />
       <SearchBar/>
@@ -29,6 +32,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/place-orders" element={<PlaceOrder />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/verify" element={<Verify/>}/>
       </Routes>
       <Footer />
     </div>

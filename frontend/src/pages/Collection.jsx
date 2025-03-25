@@ -81,7 +81,7 @@ const Collection = () => {
 
           <div className="border rounded-lg p-4 bg-gray-100 mt-4">
             <p className="mb-2 text-sm font-medium">Type</p>
-            {['Topwear', 'Bottomwear', 'Winterwear'].map((item) => (
+            {['Topwear', 'Bottomwear', 'Winterwear',"Sneakers","Crocs"].map((item) => (
               <label key={item} className="flex items-center gap-2 text-sm font-light text-gray-700">
                 <input
                   type="checkbox"

@@ -1,7 +1,17 @@
 import React from "react";
 import { assets } from "../assets/assets";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Pagination, Autoplay } from "swiper/modules";
 
 const Hero = () => {
+  const heroImages = [
+    assets.hero_img,
+    assets.hero2,
+    assets.hero3 
+  ];
+
   return (
     <div className="flex flex-col sm:flex-row border border-gray-400">
       {/* Hero Left Side */}
@@ -23,7 +33,25 @@ const Hero = () => {
         </div>
       </div>
       {/* Hero Right Side */}
-      <img className="w-full sm:w-1/2" src={assets.hero_img} alt="Hero section" />
+      <div className="w-full sm:w-1/2">
+        <Swiper
+          modules={[Pagination, Autoplay]}
+          pagination={{ clickable: true }}
+          autoplay={{ delay: 3000 }}
+          loop={true}
+          className="w-full h-full"
+        >
+          {heroImages.map((img, index) => (
+            <SwiperSlide key={index}>
+              <img
+                className="w-full object-cover"
+                src={img}
+                alt={`Slide ${index}`}
+              />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+      </div>
     </div>
   );
 };

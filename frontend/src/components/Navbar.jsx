@@ -34,9 +34,13 @@ const Navbar = () => {
 
   return (
     <nav className="flex items-center justify-between py-4 relative px-4 sm:px-8">
-      <Link to="/">
-        <img src={assets.logo} alt="Logo" className="w-40" />
-      </Link>
+     <Link to="/" className="flex items-center space-x-2">
+     <h2 className="text-3xl font-bold text-yellow-600 tracking-wider drop-shadow-sm">
+  Fashion Fusion
+</h2>
+
+</Link>
+
 
       <ul className="hidden sm:flex gap-6 text-gray-700">
         <NavLink to="/" className={({ isActive }) => (isActive ? "text-black font-bold" : "text-gray-700")}>

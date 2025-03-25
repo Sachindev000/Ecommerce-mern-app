@@ -10,7 +10,7 @@ const ShopContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
-  const [cartItems, setCartItem] = useState({});
+  const [cartItems, setCartItems] = useState({});
   const [products,setProducts]=useState([])
   const [token,setToken]=useState("")
 
@@ -32,8 +32,8 @@ const ShopContextProvider = (props) => {
     } else {
       cartData[itemId] = {};
       cartData[itemId][size] = 1;
-    }
-    setCartItem(cartData);
+    }   
+    setCartItems(cartData);
 
     if (token) {
       try {
@@ -65,7 +65,15 @@ const ShopContextProvider = (props) => {
     let cartData=structuredClone(cartItems)
     cartData[itemId][size]=quantity
 
-    setCartItem(cartData)
+    setCartItems(cartData)
+    if (token) {
+      try {
+        await axios.post(backendUrl + '/api/cart/update',{itemId,size,quantity},{headers:{token}})
+      } catch (error) {
+        console.log(error);
+        toast.error(error.message)
+      }
+    }
   }
   const getCartAmount=()=>{
     let totalAmount=0
@@ -102,7 +110,18 @@ const ShopContextProvider = (props) => {
       toast.error(res.data.message)
     }
   };
-  
+
+  const getUserCart=async(token)=>{
+    try {
+      const res=await axios.post(backendUrl + '/api/cart/get',{},{headers:{token}})
+      if (res.data.success) {
+        setCartItems(res.data.cartData)
+      }
+    } catch (error) {
+        console.log(error);
+        toast.error(error.message)
+    }
+  }
   useEffect(() => {
     getProductsData();
   }, []);
@@ -110,6 +129,7 @@ const ShopContextProvider = (props) => {
   useEffect(()=>{
     if (!token && localStorage.getItem('token')) {
       setToken(localStorage.getItem('token'))
+      getUserCart(localStorage.getItem('token'))
     }
   },[])
 
@@ -122,7 +142,7 @@ const ShopContextProvider = (props) => {
     showSearch,
     setShowSearch,
     cartItems,
-    setCartItem,
+    setCartItems,
     addToCart,
     getCartCount,
     updtateQuantity,

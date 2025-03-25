@@ -7,7 +7,7 @@ import NewsLetterBox from '../components/NewsLetterBox'
 
 const Home = () => {
   return (
-    <div>
+    <div >
       <Hero/>
       <LatestCOllection/>
       <BestSeller/>
